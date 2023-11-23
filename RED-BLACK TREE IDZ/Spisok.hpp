@@ -1,6 +1,6 @@
 #include <set>
 #include <iostream>
-
+#include <fstream>
 
 struct NodeSp {
     int ch;
@@ -45,13 +45,13 @@ void AddInEnd(NodeList& list, int chs) {
 
 
 // Удалить перед каждым заданным K-ым  
-void del(NodeList& list, int K) {
+void deleteNomer(NodeList& list, int K) {
     NodeSp* current = list.head;
     if (list.head != NULL)
     {
         while (current->next != list.head)
         {
-            if (current->next->ch == K) {
+            if (current->ch == K) {
                 if (current == list.head) {
                     NodeSp* tmp = new NodeSp;
                     tmp = list.head;
@@ -89,6 +89,22 @@ bool Poisk(NodeList& list, int ch) {
     return s;
 
 }
+int size(NodeList& list) {
+    NodeSp* current = list.head;
+    int s = 1;
+    if (list.head == NULL) return 0;
+    else {
+        while (current->next != list.head) {
+            s++;
+            current = current->next;
+        }
+        
+    }
+    return s;
+
+}
+
+
 
 void ClearNodeList(NodeList& list) {
     if (list.head != NULL) {
@@ -112,7 +128,19 @@ void print(NodeList& list) {
             current = current->next;
             std::cout << current->ch << " ";
         }
-        std::cout << std::endl;
+    }
+}
+
+
+void fPrint(NodeList& list,std::ofstream* f) {
+    NodeSp* current = list.head;
+    if (list.head == NULL);
+    else {
+        *f << list.head->ch << " ";
+        while (current->next != list.head) {
+            current = current->next;
+            *f << current->ch << " ";
+        }
     }
 }
 

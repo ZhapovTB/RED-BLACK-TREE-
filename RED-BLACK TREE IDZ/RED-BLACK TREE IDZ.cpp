@@ -1,5 +1,5 @@
 ﻿#include "Spisok.hpp"
-#include <fstream>
+
 #include <string>
 struct TimeKey {
    short int h;
@@ -23,7 +23,7 @@ enum Color{BLACK,RED};
 
 struct Node {
     TimeKey key;
-    int data; // номер строки
+    NodeList data; // номер строки
     Color NodeColor;
     Node* parentNode = nullptr;
     Node* leftNode   = nullptr;
@@ -186,6 +186,7 @@ private:
             if (x->leftNode)    recDel(x->leftNode);
             if (x == x->parentNode->leftNode) x->parentNode->leftNode = TNULL;
             if (x == x->parentNode->rightNode) x->parentNode->rightNode = TNULL;
+            ClearNodeList(x->data);
             delete x;
         }
     }
@@ -200,10 +201,11 @@ public:
     }
     
     void insert(TimeKey k, int data) {
+        bool flag = 1;
         Node* x = root;
         Node* y = TNULL;
         Node* tmp = new Node;
-        tmp->data = data;
+        AddInEnd(tmp->data , data);
         tmp->key = k;
         tmp->NodeColor = RED;
         tmp->leftNode = TNULL;
@@ -211,19 +213,24 @@ public:
        
         while (x != TNULL) {
             y = x;
-            if (compare(tmp->key, x->key) == '<') x = x->leftNode;
-            else x=x->rightNode;
+            if (compare(tmp->key, x->key) == '=') { AddInEnd(x->data, data); flag = 0; x = TNULL; }
+            else {
+                if (compare(tmp->key, x->key) == '<') x = x->leftNode;
+                else x = x->rightNode;
+            }
         }
-        tmp->parentNode = y;
-        if (y == TNULL) {
-            tmp->NodeColor = BLACK;
-            root = tmp;
+        if (flag == 1) {
+            tmp->parentNode = y;
+            if (y == TNULL) {
+                tmp->NodeColor = BLACK;
+                root = tmp;
+            }
+            else if (compare(tmp->key, y->key) == '<')  y->leftNode = tmp;
+            else y->rightNode = tmp;
+
+            insertFix(tmp);
+            root->NodeColor = BLACK;
         }
-        else if (compare(tmp->key, y->key) == '<')  y->leftNode = tmp;
-        else y->rightNode = tmp;
-        
-        insertFix(tmp);
-        root->NodeColor = BLACK;
     }
 
     void del(Node* z) {
@@ -258,6 +265,7 @@ public:
                 y->NodeColor = z->NodeColor;
 
             };
+            ClearNodeList(z->data);
             delete z;
             if (y_original == BLACK) delfix(x);
         }
@@ -269,7 +277,7 @@ public:
         if (root!=TNULL) {
            
             inOrderTravers(root->rightNode, f);
-            *f << root->data<<" ";
+            fPrint(root->data, f);
             inOrderTravers(root->leftNode, f);
         }
     }
@@ -280,7 +288,7 @@ public:
     }
   
 
-    void printBT(const std::string& prefix, const Node* node, bool isLeft)
+    void printBT(const std::string& prefix, Node* node, bool isLeft)
     {
         if (node != TNULL)
         {
@@ -289,7 +297,7 @@ public:
             std::cout << (isLeft ? "|--" : "'--");
 
     
-            std::cout << node->data <<'(' <<node->NodeColor<<')'<< std::endl;
+            print(node->data); std::cout << '(' << node->NodeColor << ')' << std::endl;
             
             printBT(prefix + (isLeft ? "|   " : "    "), node->rightNode, true);
             printBT(prefix + (isLeft ? "|   " : "    "), node->leftNode, false);
@@ -336,7 +344,7 @@ int main()
     NodeList listStrok;
  
 
-    file.open("Test.txt");
+    file.open("TEST2.txt");
     if (!file) {
         std::cout << error1 <<"\n";
     }
@@ -376,7 +384,7 @@ int main()
    
         if (!(kCin.h < 24 && kCin.m < 60 && kCin.s < 60)) std::cout << error3 << std::endl;
         else {
-            if (tree.search(kCin) != 0) std::cout << tree.search(kCin)->data;
+            if (tree.search(kCin) != 0) print( tree.search(kCin)->data);
             else std::cout << "Элемент не найден";
         }
         break;
@@ -387,7 +395,15 @@ int main()
 
         if (!(kCin.h < 24 && kCin.m < 60 && kCin.s < 60)) std::cout << error3 << std::endl;
         else {
-            if (tree.search(kCin) != 0) tree.del(tree.search(kCin));
+            if (tree.search(kCin) != 0) {
+                if (size(tree.search(kCin)->data) > 1) {
+                    std::cout << " Введите номер строки("; print(tree.search(kCin)->data); std::cout << ')' << std::endl;
+                    int Nomer;
+                    std::cin >> Nomer;
+                    deleteNomer(tree.search(kCin)->data, Nomer);
+                }
+                if(size(tree.search(kCin)->data) <= 1) tree.del(tree.search(kCin));
+            }
             else std::cout << "Элемент не найден";
         }
         break;
@@ -400,8 +416,11 @@ int main()
 
     std::cout<<"\n";
  
-   tree.printBT("", tree.GetRoot(), false);
+    tree.allDel();
+    tree.insert(k, 134);
 
+   tree.printBT("", tree.GetRoot(), false);
+   
 
    std::ofstream* fout = new std::ofstream("out.txt");
    tree.inOrderTravers(tree.GetRoot(), fout);
