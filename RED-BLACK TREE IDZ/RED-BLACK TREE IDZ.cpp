@@ -416,9 +416,7 @@ int main()
 
     std::cout<<"\n";
  
-    tree.allDel();
-    tree.insert(k, 134);
-
+   
    tree.printBT("", tree.GetRoot(), false);
    
 
