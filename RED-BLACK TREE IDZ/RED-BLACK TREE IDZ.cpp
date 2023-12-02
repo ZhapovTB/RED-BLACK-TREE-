@@ -406,7 +406,7 @@ int main()
     kCin.h = 13;
     tree.DeleteNode(kCin, 1);
     kCin.h = 14;
-    tree.DeleteNode(kCin, 1);
+    tree.DeleteNode(kCin, 1);э
     kCin.h = 15;
     tree.DeleteNode(kCin, 1);
    tree.printBT("", tree.GetRoot(), false);
